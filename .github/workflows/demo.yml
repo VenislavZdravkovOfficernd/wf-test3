@@ -9,10 +9,21 @@ jobs:
         steps: 
             - name: Get code
               uses: actions/checkout@v4
+            - name: Get yarn cache directory path
+              id: yarn-cache-dir-path
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+            - name: Cache depedencies
+              uses: actions/cache@v4
+              id: yarn-cache
+              with: 
+                path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                restore-keys: |
+                  ${{ runner.os }}-yarn-
             - name: Install dependencies 
               run: yarn install
-            # - name: Lint code
-            #   run: yarn lint
+            - name: Lint code
+              run: yarn lint
             - name: Test code
               run: yarn test
     build: 
@@ -23,6 +34,14 @@ jobs:
         steps: 
             - name: Get code
               uses: actions/checkout@v4
+            - name: Cache depedencies
+              uses: actions/cache@v4
+              id: yarn-cache
+              with: 
+                path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                restore-keys: |
+                  ${{ runner.os }}-yarn-
             - name: Install dependencies 
               run: yarn install
             - name: Build code
